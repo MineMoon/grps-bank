@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package account;
+
+option go_package = "grpc-bank/pkg/api/account;accountpb";
+
+service AccountService {
+  rpc GetAccount(GetAccountRequest) returns (GetAccountResponse);
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
+  rpc ExecuteTransfer(ExecuteTransferRequest) returns (ExecuteTransferResponse);
+  rpc Deposit(DepositRequest) returns (DepositResponse);
+}
+
+message GetAccountRequest {
+  string account_id = 1;
+}
+
+message GetAccountResponse {
+  string account_id = 1;
+  string user_id = 2;
+  string account_number = 3;
+  string balance = 4;
+  string currency = 5;
+}
+
+message CreateAccountRequest {
+  string user_id = 1;
+  string currency = 2;
+}
+
+message CreateAccountResponse {
+  string account_id = 1;
+  string account_number = 2;
+}
+
+message ExecuteTransferRequest {
+  string from_account_id = 1;
+  string to_account_id = 2;
+  string amount = 3;
+}
+
+message ExecuteTransferResponse {
+  string status = 1;
+  string from_balance_after = 2;
+}
+
+message DepositRequest {
+  string account_id = 1;
+  string amount = 2;
+}
+
+message DepositResponse {
+  string status = 1;
+  string balance_after = 2;
+}

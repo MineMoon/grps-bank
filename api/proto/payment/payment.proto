@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package account;
+
+option go_package = "grpc-bank/pkg/api/payment;paymentpb";
+
+service PaymentService {
+    rpc CreatePayment(CreatePaymentRequest) returns (CreatePaymentResponse);
+}
+
+message CreatePaymentRequest {
+    string idempotency_key = 1;
+    string from_account_id = 2;
+    string to_account_id = 3;
+    string amount = 4;
+}
+
+message CreatePaymentResponse {
+  string payment_id = 1;
+  string status = 2;
+  string created_at = 3;
+}
