@@ -1,10 +1,10 @@
 package repository
 
 import (
-	"bank-system/internal/account/domain"
 	"context"
 	"errors"
 	"fmt"
+	"grpc-bank/internal/account/domain"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -40,7 +40,7 @@ func (r *AccountRepository) GetbyID(ctx context.Context, id string) (*domain.Acc
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, domain.ErrAccountNotFound
 		}
-		return nil, fmt.Errorf("Request execution error: %w", err)
+		return nil, fmt.Errorf("request execution error: %w", err)
 	}
 
 	return &acc, nil
@@ -53,10 +53,10 @@ func (r *AccountRepository) Create(ctx context.Context, acc *domain.Account) err
 		RETURNING id, created_at
 	`
 
-	err := r.pool.QueryRow(ctx, query, acc.ID, acc.AccountNumber, acc.Balance, acc.Currency).Scan(&acc.ID, &acc.CreatedAt)
+	err := r.pool.QueryRow(ctx, query, acc.UserId, acc.AccountNumber, acc.Balance, acc.Currency).Scan(&acc.ID, &acc.CreatedAt)
 
 	if err != nil {
-		return fmt.Errorf("Account Insert Error: %w", err)
+		return fmt.Errorf("account Insert Error: %w", err)
 	}
 	return nil
 }
@@ -64,9 +64,11 @@ func (r *AccountRepository) Create(ctx context.Context, acc *domain.Account) err
 func (r *AccountRepository) Transfer(ctx context.Context, fromID, toID string, amount decimal.Decimal) (decimal.Decimal, error) {
 	tx, err := r.pool.Begin(ctx)
 	if err != nil {
-		return decimal.Zero, fmt.Errorf("Failed to start transaction: %w", err)
+		return decimal.Zero, fmt.Errorf("failed to start transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	firstID, secondID := fromID, toID
 	if fromID > toID {
@@ -106,16 +108,16 @@ func (r *AccountRepository) Transfer(ctx context.Context, fromID, toID string, a
 	_, err = tx.Exec(ctx, `UPDATE accounts SET balance = balance - $1 WHERE id = $2;`, amount, fromID)
 
 	if err != nil {
-		return decimal.Zero, fmt.Errorf("Write-off error: %w", err)
+		return decimal.Zero, fmt.Errorf("write-off error: %w", err)
 	}
 
 	_, err = tx.Exec(ctx, `UPDATE accounts SET balance = balance + $1 WHERE id = $2;`, amount, toID)
 	if err != nil {
-		return decimal.Zero, fmt.Errorf("Crediting error: %w", err)
+		return decimal.Zero, fmt.Errorf("crediting error: %w", err)
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		return decimal.Zero, fmt.Errorf("Transaction Commit Error: %w", err)
+		return decimal.Zero, fmt.Errorf("transaction Commit Error: %w", err)
 	}
 
 	return newFromBalance, nil

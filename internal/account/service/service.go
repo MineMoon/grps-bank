@@ -1,10 +1,10 @@
 package service
 
 import (
-	"bank-system/internal/account/domain"
 	"context"
 	"crypto/rand"
 	"fmt"
+	"grpc-bank/internal/account/domain"
 	"math/big"
 
 	"github.com/shopspring/decimal"
@@ -45,7 +45,7 @@ func (s *AccountService) CreateAccount(ctx context.Context, userID, currency str
 	accNumber, err := generateAccountNumber()
 
 	if err != nil {
-		return nil, fmt.Errorf("Generation Account Number Error: %w", err)
+		return nil, fmt.Errorf("generation account number error: %w", err)
 	}
 
 	acc := &domain.Account{

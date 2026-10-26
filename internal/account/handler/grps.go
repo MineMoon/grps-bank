@@ -1,11 +1,12 @@
 package handler
 
 import (
-	"bank-system/internal/account/domain"
-	"bank-system/internal/account/service"
-	accountpb "bank-system/pkg/api/account"
 	"context"
 	"errors"
+
+	"grpc-bank/internal/account/domain"
+	"grpc-bank/internal/account/service"
+	accountpb "grpc-bank/pkg/api/account"
 
 	"github.com/shopspring/decimal"
 	"google.golang.org/grpc/codes"
@@ -32,7 +33,7 @@ func (h *AccountHandler) GetAccount(ctx context.Context, req *accountpb.GetAccou
 		if errors.Is(err, domain.ErrAccountNotFound) {
 			return nil, status.Error(codes.NotFound, "account not found")
 		}
-		return nil, status.Errorf(codes.Internal, "Internal Server Errror: %w", err)
+		return nil, status.Errorf(codes.Internal, "Internal Server Errror: %v", err)
 	}
 
 	return &accountpb.GetAccountResponse{
@@ -52,7 +53,7 @@ func (h *AccountHandler) CreateAccount(ctx context.Context, req *accountpb.Creat
 
 	acc, err := h.svc.CreateAccount(ctx, req.GetUserId(), req.GetCurrency())
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to create an account: %w", err)
+		return nil, status.Errorf(codes.Internal, "failed to create an account: %v", err)
 	}
 
 	return &accountpb.CreateAccountResponse{
@@ -67,7 +68,7 @@ func (h *AccountHandler) ExecuteTransfer(ctx context.Context, req *accountpb.Exe
 	}
 
 	amount, err := decimal.NewFromString(req.GetAmount())
-	if err != nil || decimal.Zero.LessThanOrEqual(amount) {
+	if err != nil || amount.LessThanOrEqual(decimal.Zero) {
 		return nil, status.Error(codes.InvalidArgument, "incorrect amount")
 	}
 
@@ -75,13 +76,13 @@ func (h *AccountHandler) ExecuteTransfer(ctx context.Context, req *accountpb.Exe
 	if err != nil {
 		switch {
 		case errors.Is(err, domain.ErrAccountNotFound):
-			return nil, status.Error(codes.NotFound, "один из счетов не найден")
+			return nil, status.Error(codes.NotFound, "one of the accounts was not found")
 		case errors.Is(err, domain.ErrInsufficientFunds):
-			return nil, status.Error(codes.FailedPrecondition, "недостаточно средств на счете")
+			return nil, status.Error(codes.FailedPrecondition, "insufficient funds in the account")
 		case errors.Is(err, domain.ErrSameAccountTransfer):
-			return nil, status.Error(codes.InvalidArgument, "нельзя перевести на тот же счет")
+			return nil, status.Error(codes.InvalidArgument, "cannot be transferred to the same account")
 		default:
-			return nil, status.Errorf(codes.Internal, "ошибка проведения транзакции: %v", err)
+			return nil, status.Errorf(codes.Internal, "transaction processing error: %v", err)
 		}
 	}
 
@@ -91,4 +92,23 @@ func (h *AccountHandler) ExecuteTransfer(ctx context.Context, req *accountpb.Exe
 	}, nil
 }
 
-func (h *AccountHandler) Deposit(ctx context.Context, req *accountpb.DepositRequest) (*accountpb.DepositResponse, error)
+func (h *AccountHandler) Deposit(ctx context.Context, req *accountpb.DepositRequest) (*accountpb.DepositResponse, error) {
+
+	amount, err := decimal.NewFromString(req.GetAmount())
+	if err != nil || amount.LessThanOrEqual(decimal.Zero) {
+		return nil, status.Error(codes.InvalidArgument, "Incorrect top-up amount")
+	}
+
+	newBalance, err := h.svc.Deposit(ctx, req.GetAccountId(), amount)
+	if err != nil {
+		if errors.Is(err, domain.ErrAccountNotFound) {
+			return nil, status.Error(codes.NotFound, "account not found")
+		}
+		return nil, status.Errorf(codes.Internal, "deposit error: %v", err)
+	}
+
+	return &accountpb.DepositResponse{
+		Status:       "SUCCESS",
+		BalanceAfter: newBalance.String(),
+	}, nil
+}

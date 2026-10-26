@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package account;
+package payment;
 
 option go_package = "grpc-bank/pkg/api/payment;paymentpb";
 

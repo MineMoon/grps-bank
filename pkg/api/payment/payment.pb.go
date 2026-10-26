@@ -153,7 +153,7 @@ var File_payment_payment_proto protoreflect.FileDescriptor
 
 const file_payment_payment_proto_rawDesc = "" +
 	"\n" +
-	"\x15payment/payment.proto\x12\aaccount\"\xa3\x01\n" +
+	"\x15payment/payment.proto\x12\apayment\"\xa3\x01\n" +
 	"\x14CreatePaymentRequest\x12'\n" +
 	"\x0fidempotency_key\x18\x01 \x01(\tR\x0eidempotencyKey\x12&\n" +
 	"\x0ffrom_account_id\x18\x02 \x01(\tR\rfromAccountId\x12\"\n" +
@@ -166,7 +166,7 @@ const file_payment_payment_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x03 \x01(\tR\tcreatedAt2`\n" +
 	"\x0ePaymentService\x12N\n" +
-	"\rCreatePayment\x12\x1d.account.CreatePaymentRequest\x1a\x1e.account.CreatePaymentResponseB%Z#grpc-bank/pkg/api/payment;paymentpbb\x06proto3"
+	"\rCreatePayment\x12\x1d.payment.CreatePaymentRequest\x1a\x1e.payment.CreatePaymentResponseB%Z#grpc-bank/pkg/api/payment;paymentpbb\x06proto3"
 
 var (
 	file_payment_payment_proto_rawDescOnce sync.Once
@@ -182,12 +182,12 @@ func file_payment_payment_proto_rawDescGZIP() []byte {
 
 var file_payment_payment_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_payment_payment_proto_goTypes = []any{
-	(*CreatePaymentRequest)(nil),  // 0: account.CreatePaymentRequest
-	(*CreatePaymentResponse)(nil), // 1: account.CreatePaymentResponse
+	(*CreatePaymentRequest)(nil),  // 0: payment.CreatePaymentRequest
+	(*CreatePaymentResponse)(nil), // 1: payment.CreatePaymentResponse
 }
 var file_payment_payment_proto_depIdxs = []int32{
-	0, // 0: account.PaymentService.CreatePayment:input_type -> account.CreatePaymentRequest
-	1, // 1: account.PaymentService.CreatePayment:output_type -> account.CreatePaymentResponse
+	0, // 0: payment.PaymentService.CreatePayment:input_type -> payment.CreatePaymentRequest
+	1, // 1: payment.PaymentService.CreatePayment:output_type -> payment.CreatePaymentResponse
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
