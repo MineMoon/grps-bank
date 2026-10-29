@@ -49,7 +49,7 @@ func (s *AccountService) CreateAccount(ctx context.Context, userID, currency str
 	}
 
 	acc := &domain.Account{
-		UserId:        userID,
+		UserID:        userID,
 		AccountNumber: accNumber,
 		Balance:       decimal.NewFromInt(0),
 		Currency:      currency,

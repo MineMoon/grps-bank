@@ -38,7 +38,7 @@ func (h *AccountHandler) GetAccount(ctx context.Context, req *accountpb.GetAccou
 
 	return &accountpb.GetAccountResponse{
 		AccountId:     acc.ID,
-		UserId:        acc.UserId,
+		UserId:        acc.UserID,
 		AccountNumber: acc.AccountNumber,
 		Balance:       acc.Balance.String(),
 		Currency:      acc.Currency,
@@ -53,6 +53,9 @@ func (h *AccountHandler) CreateAccount(ctx context.Context, req *accountpb.Creat
 
 	acc, err := h.svc.CreateAccount(ctx, req.GetUserId(), req.GetCurrency())
 	if err != nil {
+		if errors.Is(err, domain.ErrAccountAlreadyExists) {
+			return nil, status.Error(codes.AlreadyExists, "the user already has an account in this currency")
+		}
 		return nil, status.Errorf(codes.Internal, "failed to create an account: %v", err)
 	}
 

@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"grpc-bank/internal/account/domain"
 
+	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shopspring/decimal"
 )
@@ -29,7 +31,7 @@ func (r *AccountRepository) GetbyID(ctx context.Context, id string) (*domain.Acc
 	var acc domain.Account
 	err := r.pool.QueryRow(ctx, query, id).Scan(
 		&acc.ID,
-		&acc.UserId,
+		&acc.UserID,
 		&acc.AccountNumber,
 		&acc.Balance,
 		&acc.Currency,
@@ -50,16 +52,20 @@ func (r *AccountRepository) Create(ctx context.Context, acc *domain.Account) err
 	query := `
 		INSERT INTO accounts (user_id, account_number, balance, currency)
 		VALUES ($1, $2, $3, $4)
-		RETURNING id, created_at
+		RETURNING id, created_at;
 	`
-
-	err := r.pool.QueryRow(ctx, query, acc.UserId, acc.AccountNumber, acc.Balance, acc.Currency).Scan(&acc.ID, &acc.CreatedAt)
-
+	err := r.pool.QueryRow(ctx, query, acc.UserID, acc.AccountNumber, acc.Balance, acc.Currency).
+		Scan(&acc.ID, &acc.CreatedAt)
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+			return domain.ErrAccountAlreadyExists
+		}
 		return fmt.Errorf("account Insert Error: %w", err)
 	}
 	return nil
 }
+
 
 func (r *AccountRepository) Transfer(ctx context.Context, fromID, toID string, amount decimal.Decimal) (decimal.Decimal, error) {
 	tx, err := r.pool.Begin(ctx)

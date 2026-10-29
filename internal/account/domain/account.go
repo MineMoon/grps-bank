@@ -8,15 +8,16 @@ import (
 )
 
 var (
-	ErrAccountNotFound     = errors.New("Account Not Found")
-	ErrInsufficientFunds   = errors.New("Insufficient Funds")
-	ErrInvalidAmount       = errors.New("The transfer amount must be strictly positive")
-	ErrSameAccountTransfer = errors.New("You cannot transfer funds to the same account")
+	ErrAccountNotFound     = errors.New("account Not Found")
+	ErrInsufficientFunds   = errors.New("insufficient Funds")
+	ErrInvalidAmount       = errors.New("the transfer amount must be strictly positive")
+	ErrSameAccountTransfer = errors.New("you cannot transfer funds to the same account")
+	ErrAccountAlreadyExists = errors.New("the user already has an account in this currency")
 )
 
 type Account struct {
 	ID            string
-	UserId        string
+	UserID        string
 	AccountNumber string
 	Balance       decimal.Decimal
 	Currency      string

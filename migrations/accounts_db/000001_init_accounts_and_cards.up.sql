@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS accounts (
     CONSTRAINT check_positive_balance CHECK (balance >= 0)
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_currency_unique ON accounts(user_id, currency);
+
 CREATE TABLE IF NOT EXISTS cards (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     account_id UUID NOT NULL,

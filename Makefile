@@ -1,3 +1,5 @@
+MIGRATE=$(shell go env GOPATH)/bin/migrate
+
 ACCOUNTS_DB_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/accounts_db?sslmode=disable
 PAYMENTS_DB_URL=postgres://postgres:postgresadmin@127.0.0.1:5432/payments_db?sslmode=disable
 COMPOSE_FILE=deployments/docker-compose.yml
@@ -42,12 +44,12 @@ clean-all: clean-bin clean-db
 # ==============================================================================
 
 migrate-up:
-	migrate -path migrations/accounts_db -database "$(ACCOUNTS_DB_URL)" up
-	migrate -path migrations/payments_db -database "$(PAYMENTS_DB_URL)" up
+	$(MIGRATE) -path migrations/accounts_db -database "$(ACCOUNTS_DB_URL)" up
+	$(MIGRATE) -path migrations/payments_db -database "$(PAYMENTS_DB_URL)" up
 
 migrate-down:
-	migrate -path migrations/payments_db -database "$(PAYMENTS_DB_URL)" down -all
-	migrate -path migrations/accounts_db -database "$(ACCOUNTS_DB_URL)" down -all
+	$(MIGRATE) -path migrations/payments_db -database "$(PAYMENTS_DB_URL)" down -all
+	$(MIGRATE) -path migrations/accounts_db -database "$(ACCOUNTS_DB_URL)" down -all
 
 # ==============================================================================
 # PROTOBUF
